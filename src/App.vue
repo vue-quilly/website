@@ -72,7 +72,7 @@ const menuItems = computed(() => [
         <a href="https://www.npmjs.com/package/vue-quilly" target="_blank" class="button icon-only clear">
           <img src="https://icongr.am/devicon/npm-original-wordmark.svg?size=24&color=currentColor">
         </a>
-        <a href="https://ko-fi.com/oleksandrshevchuk" target="_blank" class="button icon-only clear">
+        <a href="https://buymeacoffee.com/alekswebnet" target="_blank" class="button icon-only clear">
           <img src="https://icongr.am/simple/buymeacoffee.svg?size=24&colored=true">
         </a>
       </div>
