@@ -1,48 +1,43 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { QuillyEditor } from 'vue-quilly'
-import Quill, { Delta, Range } from 'quill/core'
-import { type BlotConstructor } from 'parchment'
+import type Quill from 'quill/core'
+import type { Delta, Range } from 'quill/core'
 import 'quill/dist/quill.core.css'
 
-const editor = ref<InstanceType<typeof QuillyEditor>>()
 const model = ref<string>('<h1>Hello world!</h1><p>I am a new paragraph</p>')
+const quill = shallowRef<Quill>()
 const editorDelta = ref<Delta>()
 const editorRange = ref<Range>()
 
-let quill: Quill | undefined
-
-const Inline  = Quill.import('blots/inline') as BlotConstructor
-const Block = Quill.import('blots/block') as BlotConstructor
-
-class BoldBlot extends Inline {}
-BoldBlot.blotName = 'bold'
-BoldBlot.tagName = 'strong'
-
-class ItalicBlot extends Inline { }
-ItalicBlot.blotName = 'italic'
-ItalicBlot.tagName = 'em'
-
-class HeaderBlot extends Block {
-  static formats(node: Element) {
-    return HeaderBlot.tagName.indexOf(node.tagName) + 1;
-  }
-}
-HeaderBlot.blotName = 'header'
-HeaderBlot.tagName = ['H1', 'H2']
-
-Quill.register(BoldBlot)
-Quill.register(ItalicBlot)
-Quill.register(HeaderBlot)
-
 const options = {
   placeholder: 'Start your story here...',
-  readOnly: false
+  // Keep these formats only, even after another tab has loaded the full Quill build
+  formats: ['bold', 'italic', 'header']
 }
 
-onMounted(() => {
-  quill = editor.value!.initialize(Quill)
-})
+// quill/core with bold, italic and header, loaded after mount
+const loadQuill = () => import('../quill/core')
+
+// Apply a format to the selection, or remove it if it's already applied
+const toggle = (format: string, value: unknown = true) => {
+  const editor = quill.value
+  if (!editor) return
+  editor.format(format, editor.getFormat()[format] === value ? false : value)
+}
+
+// Replace the content through the Quill API
+const setSampleContents = () => {
+  quill.value?.setContents([
+    { insert: 'Hello' },
+    { insert: '\n', attributes: { header: 1 } },
+    { insert: 'Some ' },
+    { insert: 'initial', attributes: { bold: true } },
+    { insert: ' ' },
+    { insert: 'content', attributes: { underline: true } },
+    { insert: '\n' }
+  ])
+}
 
 const onModelValueChange = (value: string) => console.log(value)
 const onTextChange = (({ delta }: { delta: Delta }) => (editorDelta.value = delta))
@@ -52,22 +47,23 @@ const onEditorChange = (eventName: string) => console.log(eventName)
 
 <template>
   <div>
-    <button class="button" @click="quill?.format('bold', true)">Bold</button>
-    <button class="button" @click="quill?.format('italic', true)">Italic</button>
-    <button class="button" @click="quill?.format('header', 1)">Header 1</button>
-    <button class="button" @click="quill?.format('header', 2)">Header 2</button>
+    <button class="button" @click="toggle('bold')">Bold</button>
+    <button class="button" @click="toggle('italic')">Italic</button>
+    <button class="button" @click="toggle('header', 1)">Header 1</button>
+    <button class="button" @click="toggle('header', 2)">Header 2</button>
   </div>
 
   <QuillyEditor
-    ref="editor"
     v-model="model"
     :options="options"
+    :quill-class="loadQuill"
+    @ready="quill = $event"
     @update:model-value="onModelValueChange"
     @text-change="onTextChange"
     @selection-change="onSelectionChange"
     @editor-change="onEditorChange"
   />
-  
+
   <hr>
   <p class="tag">Model value:</p>
   <p><small>{{ model }}</small></p>
@@ -76,21 +72,7 @@ const onEditorChange = (eventName: string) => console.log(eventName)
   <hr>
   <p class="tag">Contents:</p>
   <p><small>{{ quill?.getContents() }}</small></p>
-  <button
-    class="button"
-    @click="
-      quill?.setContents(
-        new Delta()
-          .insert('Hello')
-          .insert('\n', { header: 1 })
-          .insert('Some ')
-          .insert('initial', { bold: true })
-          .insert(' ')
-          .insert('content', { underline: true })
-          .insert('\n')
-      )
-    "
-  >
+  <button class="button" @click="setSampleContents">
     Set contents
   </button>
   <button class="button" @click="quill?.setContents([])">Reset contents</button>
@@ -105,7 +87,7 @@ const onEditorChange = (eventName: string) => console.log(eventName)
   <p><small>{{ editorRange }}</small></p>
   <button class="button" @click="quill?.setSelection({ index: 5, length: 2 })">Set range</button>
   <hr>
-  <p class="tag">Content lenght:</p>
+  <p class="tag">Content length:</p>
   <p><small>{{ quill?.getLength() }}</small></p>
   <hr>
   <p class="tag">Readonly:</p>
