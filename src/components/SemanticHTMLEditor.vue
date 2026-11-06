@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { QuillyEditor } from 'vue-quilly'
-import { Delta, Range } from 'quill/core'
-import Quill from 'quill'
+import type Quill from 'quill'
+import type { Delta, Range } from 'quill'
 import 'quill/dist/quill.snow.css'
 
-const editor = ref<InstanceType<typeof QuillyEditor>>()
 const model = ref<string>(`<h1>Hello world!</h1><p><strong>bold</strong></p><ol><li>item 1</li><li>item 2</li><li>item 3</li></ol><p></p><ul><li>item 4</li><li>item 5</li><li>item 6</li></ul><p>I am a new paragraph</p>`)
+const quill = shallowRef<Quill>()
 const editorDelta = ref<Delta>()
 const editorRange = ref<Range>()
-
-let quill: Quill | undefined
 
 const options = ref({
   theme: 'snow',
@@ -31,9 +29,21 @@ const options = ref({
   readOnly: false
 })
 
-onMounted(() => {
-  quill = editor.value?.initialize(Quill)
-})
+// Quill loads after mount, in its own chunk
+const loadQuill = () => import('quill')
+
+// Replace the content through the Quill API
+const setSampleContents = () => {
+  quill.value?.setContents([
+    { insert: 'Hello' },
+    { insert: '\n', attributes: { header: 1 } },
+    { insert: 'Some ' },
+    { insert: 'initial', attributes: { bold: true } },
+    { insert: ' ' },
+    { insert: 'content', attributes: { underline: true } },
+    { insert: '\n' }
+  ])
+}
 
 const onModelValueChange = (value: string) => console.log(value)
 const onTextChange = (({ delta }: { delta: Delta }) => (editorDelta.value = delta))
@@ -43,9 +53,10 @@ const onEditorChange = (eventName: string) => console.log(eventName)
 
 <template>
   <QuillyEditor
-    ref="editor"
     v-model="model"
     :options="options"
+    :quill-class="loadQuill"
+    @ready="quill = $event"
     :is-semantic-html-model="true"
     @update:model-value="onModelValueChange"
     @text-change="onTextChange"
@@ -62,18 +73,7 @@ const onEditorChange = (eventName: string) => console.log(eventName)
   <p><small>{{ quill?.getContents() }}</small></p>
   <button
     class="button"
-    @click="
-      quill?.setContents(
-        new Delta()
-          .insert('Hello')
-          .insert('\n', { header: 1 })
-          .insert('Some ')
-          .insert('initial', { bold: true })
-          .insert(' ')
-          .insert('content', { underline: true })
-          .insert('\n')
-      )
-    "
+    @click="setSampleContents"
   >
     Set contents
   </button>
