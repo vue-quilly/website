@@ -30,8 +30,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0(vue@3.5.30(typescript@5.9.3))
       vue-quilly:
-        specifier: ^1.3.0
-        version: 1.3.0(quill@2.0.3)(vue@3.5.30(typescript@5.9.3))
+        specifier: ^1.3.1
+        version: 1.3.1(quill@2.0.3)(vue@3.5.30(typescript@5.9.3))
       vue-router:
         specifier: ^5.0.4
         version: 5.0.4(@vue/compiler-sfc@3.5.30)(vue@3.5.30(typescript@5.9.3))
@@ -819,8 +819,8 @@ packages:
     peerDependencies:
       vue: ^3.3.4
 
-  vue-quilly@1.3.0:
-    resolution: {integrity: sha512-U5uD7FIs0UVBGf/yTvw1QJo46ixlkQYbO9aTcXqJveFAs6ce+U0ICozavWO5RsHqVZbXj0Z7Jjs6QNQ87ekUqQ==}
+  vue-quilly@1.3.1:
+    resolution: {integrity: sha512-pvC2k4qrc6QqAxWbDW7Yxz2ya5oIzxmttBYqT+GKwRy/tng2rHr9xGvaX8plEEve67yzIH2P0PTrwlaKmJ4oGA==}
     peerDependencies:
       quill: ^2.0.0
       vue: ^3.3.0
@@ -1494,7 +1494,7 @@ snapshots:
       markdown-it: 14.1.1
       vue: 3.5.30(typescript@5.9.3)
 
-  vue-quilly@1.3.0(quill@2.0.3)(vue@3.5.30(typescript@5.9.3)):
+  vue-quilly@1.3.1(quill@2.0.3)(vue@3.5.30(typescript@5.9.3)):
     dependencies:
       quill: 2.0.3
       vue: 3.5.30(typescript@5.9.3)
